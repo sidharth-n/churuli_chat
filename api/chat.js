@@ -46,7 +46,7 @@ export default async function handler(req) {
       },
       body: JSON.stringify({
         messages: apiMessages,
-        model: "grok-4-1-fast-non-reasoning",
+        model: "grok-4.1",
         stream: false
       })
     });
