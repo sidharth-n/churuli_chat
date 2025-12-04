@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thankan.andi - Churuli Chatbot</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Noto Sans Malayalam for script, Space Mono for Sci-Fi feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'malayalam': ['"Noto Sans Malayalam"', 'sans-serif'],
+                        'mono': ['"Space Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'neon-blue': '#00f3ff',
+                        'neon-green': '#0aff0a',
+                        'deep-black': '#050505',
+                        'dark-forest': '#0a1a1a',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'flicker': 'flicker 3s linear infinite',
+                        'glitch': 'glitch 1s linear infinite',
+                    },
+                    keyframes: {
+                        flicker: {
+                            '0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%': { opacity: 0.99, filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.7))' },
+                            '20%, 21.999%, 63%, 63.999%, 65%, 69.999%': { opacity: 0.4, filter: 'none' },
+                        },
+                        glitch: {
+                            '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
+                            '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
+                            '62%': { transform: 'translate(0,0) skew(5deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #000;
+            color: #e0e0e0;
+            overflow: hidden; /* Prevent scrolling on body, handle in chat container */
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px #00f3ff, 0 0 10px #00f3ff, 0 0 20px #00f3ff;
+        }
+        
+        .churuli-spiral {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 243, 255, 0.1);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .churuli-spiral::before {
+            content: '';
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 243, 255, 0.05);
+            animation: pulse 4s infinite;
+        }
+
+        .bg-scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 50;
+            opacity: 0.3;
+        }
+
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Glassmorphism for panels */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="font-mono h-screen w-screen flex flex-col items-center justify-center relative">
+
+    <!-- Audio Element -->
+    <!-- Using a spooky ambient track -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_22676e6966.mp3?filename=dark-drone-horror-ambience-124883.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- CRT Scanline Effect Overlay -->
+    <div class="bg-scanlines pointer-events-none"></div>
+
+    <!-- ENTRY SCREEN -->
+    <div id="entryScreen" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black transition-opacity duration-1000">
+        
+        <!-- Background Spiral decoration -->
+        <div class="churuli-spiral animate-pulse-slow"></div>
+        <div class="churuli-spiral" style="width: 500px; height: 500px; border-color: rgba(255,255,255,0.05); animation-direction: reverse;"></div>
+
+        <div class="z-10 text-center px-6 max-w-md w-full">
+            <h1 class="text-6xl md:text-8xl font-malayalam text-white font-bold mb-2 tracking-tighter animate-flicker neon-text">
+                ചുരുളി
+            </h1>
+            <p class="text-neon-blue tracking-[0.5em] text-xs uppercase mb-12 opacity-70">The Labyrinth</p>
+
+            <div class="bg-red-900/20 border border-red-500/30 p-4 rounded-lg mb-8 backdrop-blur-sm">
+                <div class="flex items-center justify-center mb-2 text-red-500">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i>
+                    <span class="font-bold text-sm">WARNING: 18+ CONTENT</span>
+                </div>
+                <p class="font-malayalam text-gray-400 text-sm leading-relaxed">
+                    നിങ്ങൾ ചുരുളിയിലേക്ക് പ്രവേശിക്കുകയാണ്. നിയമങ്ങൾ ഇവിടെ ബാധകമല്ല. ഭാഷ കഠിനമായിരിക്കും. സ്വന്തം ഉത്തരവാദിത്തത്തിൽ മാത്രം മുന്നോട്ട് പോവുക.
+                </p>
+                <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-wide">
+                    Strong Language • Adult Themes • Sci-Fi Horror
+                </p>
+            </div>
+
+            <button onclick="enterChuruli()" class="group relative px-8 py-4 bg-transparent border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-black transition-all duration-300 rounded font-bold uppercase tracking-widest text-sm w-full">
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    <span>Enter Churuli</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                </span>
+                <div class="absolute inset-0 bg-neon-blue/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CHAT INTERFACE (Hidden initially) -->
+    <div id="chatInterface" class="hidden flex-col w-full h-full max-w-md md:max-w-2xl mx-auto bg-deep-black relative z-30 shadow-2xl border-x border-gray-800">
+        
+        <!-- Header -->
+        <header class="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-black/90 backdrop-blur z-20">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-neon-blue/50">
+                        <img src="https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?q=80&w=200&auto=format&fit=crop" alt="Thankan" class="w-full h-full object-cover opacity-80 grayscale contrast-125">
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+                </div>
+                <div>
+                    <h2 class="font-malayalam font-bold text-white text-lg leading-none">തങ്കൻ</h2>
+                    <span class="text-[10px] text-neon-blue uppercase tracking-wider">Online | Churuli OS v2.0</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSound()" id="soundBtn" class="p-2 text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="volume-2" class="w-5 h-5"></i>
+                </button>
+                <button onclick="toggleSettings()" class="p-2 text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 relative scroll-smooth">
+            <div class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            
+            <!-- Welcome Message -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
+                <div class="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
+                    <p class="font-malayalam text-gray-200 text-sm leading-relaxed">
+                        ആരാടാ നീയൊക്കെ? ചുരുളിയിൽ എന്തിനാ വന്നത്? വഴി തെറ്റിയതാണോ അതോ തലക്ക് വെളിവില്ലാഞ്ഞിട്ടാണോ? 
+                        <br><br>
+                        <span class="text-xs text-gray-500 italic font-mono block mt-1">പരിഭാഷ: Who are you? Why have you come to Churuli? Are you lost or just insane?</span>
+                    </p>
+                    <span class="text-[10px] text-gray-600 mt-1 block text-right font-mono">Just now</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-gray-800 bg-black/90 backdrop-blur z-20">
+            <form id="chatForm" onsubmit="handleChat(event)" class="relative flex items-end gap-2">
+                <div class="flex-1 relative">
+                    <input type="text" id="userInput" 
+                        class="w-full bg-gray-900/50 text-white border border-gray-700 rounded-xl py-3 pl-4 pr-10 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue/50 transition-all font-malayalam placeholder-gray-600 text-sm"
+                        placeholder="Type something here..." autocomplete="off">
+                </div>
+                <button type="submit" class="p-3 bg-neon-blue text-black rounded-xl hover:bg-cyan-400 transition-colors shadow-[0_0_10px_rgba(0,243,255,0.3)]">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </form>
+            <div class="text-center mt-2">
+                <p class="text-[10px] text-gray-600 font-mono">Powered by Grok AI • Secure Connection</p>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+            <div class="glass-panel w-full max-w-sm rounded-xl p-6 relative">
+                <button onclick="toggleSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                            <option value="manglish">Manglish (Lazy Mode)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="saveSettings()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-sm text-white font-mono transition-colors">
+                            SAVE CHANGES
+                        </button>
+                    </div>
+                </div>
+        .churuli-spiral::before {
+            content: '';
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 243, 255, 0.05);
+            animation: pulse 4s infinite;
+        }
+
+        .bg-scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 50;
+            opacity: 0.3;
+        }
+
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Glassmorphism for panels */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="font-mono h-screen w-screen flex flex-col items-center justify-center relative">
+
+    <!-- Audio Element -->
+    <!-- Using a spooky ambient track -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_22676e6966.mp3?filename=dark-drone-horror-ambience-124883.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- CRT Scanline Effect Overlay -->
+    <div class="bg-scanlines pointer-events-none"></div>
+
+    <!-- ENTRY SCREEN -->
+    <div id="entryScreen" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black transition-opacity duration-1000">
+        
+        <!-- Background Spiral decoration -->
+        <div class="churuli-spiral animate-pulse-slow"></div>
+        <div class="churuli-spiral" style="width: 500px; height: 500px; border-color: rgba(255,255,255,0.05); animation-direction: reverse;"></div>
+
+        <div class="z-10 text-center px-6 max-w-md w-full">
+            <h1 class="text-6xl md:text-8xl font-malayalam text-white font-bold mb-2 tracking-tighter animate-flicker neon-text">
+                ചുരുളി
+            </h1>
+            <p class="text-neon-blue tracking-[0.5em] text-xs uppercase mb-12 opacity-70">The Labyrinth</p>
+
+            <div class="bg-red-900/20 border border-red-500/30 p-4 rounded-lg mb-8 backdrop-blur-sm">
+                <div class="flex items-center justify-center mb-2 text-red-500">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i>
+                    <span class="font-bold text-sm">WARNING: 18+ CONTENT</span>
+                </div>
+                <p class="font-malayalam text-gray-400 text-sm leading-relaxed">
+                    നിങ്ങൾ ചുരുളിയിലേക്ക് പ്രവേശിക്കുകയാണ്. നിയമങ്ങൾ ഇവിടെ ബാധകമല്ല. ഭാഷ കഠിനമായിരിക്കും. സ്വന്തം ഉത്തരവാദിത്തത്തിൽ മാത്രം മുന്നോട്ട് പോവുക.
+                </p>
+                <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-wide">
+                    Strong Language • Adult Themes • Sci-Fi Horror
+                </p>
+            </div>
+
+            <button onclick="enterChuruli()" class="group relative px-8 py-4 bg-transparent border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-black transition-all duration-300 rounded font-bold uppercase tracking-widest text-sm w-full">
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    <span>Enter Churuli</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                </span>
+                <div class="absolute inset-0 bg-neon-blue/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CHAT INTERFACE (Hidden initially) -->
+    <div id="chatInterface" class="hidden flex-col w-full h-full max-w-md md:max-w-2xl mx-auto bg-deep-black relative z-30 shadow-2xl border-x border-gray-800">
+        
+        <!-- Header -->
+        <header class="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-black/90 backdrop-blur z-20">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-neon-blue/50">
+                        <img src="https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?q=80&w=200&auto=format&fit=crop" alt="Thankan" class="w-full h-full object-cover opacity-80 grayscale contrast-125">
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+                </div>
+                <div>
+                    <h2 class="font-malayalam font-bold text-white text-lg leading-none">തങ്കൻ</h2>
+                    <span class="text-[10px] text-neon-blue uppercase tracking-wider">Online | Churuli OS v2.0</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSound()" id="soundBtn" class="p-2 text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="volume-2" class="w-5 h-5"></i>
+                </button>
+                <button onclick="toggleSettings()" class="p-2 text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 relative scroll-smooth">
+            <div class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            
+            <!-- Welcome Message -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
+                <div class="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
+                    <p class="font-malayalam text-gray-200 text-sm leading-relaxed">
+                        ആരാടാ നീയൊക്കെ? ചുരുളിയിൽ എന്തിനാ വന്നത്? വഴി തെറ്റിയതാണോ അതോ തലക്ക് വെളിവില്ലാഞ്ഞിട്ടാണോ? 
+                        <br><br>
+                        <span class="text-xs text-gray-500 italic font-mono block mt-1">പരിഭാഷ: Who are you? Why have you come to Churuli? Are you lost or just insane?</span>
+                    </p>
+                    <span class="text-[10px] text-gray-600 mt-1 block text-right font-mono">Just now</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-gray-800 bg-black/90 backdrop-blur z-20">
+            <form id="chatForm" onsubmit="handleChat(event)" class="relative flex items-end gap-2">
+                <div class="flex-1 relative">
+                    <input type="text" id="userInput" 
+                        class="w-full bg-gray-900/50 text-white border border-gray-700 rounded-xl py-3 pl-4 pr-10 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue/50 transition-all font-malayalam placeholder-gray-600 text-sm"
+                        placeholder="Type something here..." autocomplete="off">
+                </div>
+                <button type="submit" class="p-3 bg-neon-blue text-black rounded-xl hover:bg-cyan-400 transition-colors shadow-[0_0_10px_rgba(0,243,255,0.3)]">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </form>
+            <div class="text-center mt-2">
+                <p class="text-[10px] text-gray-600 font-mono">Powered by Grok AI • Secure Connection</p>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+            <div class="glass-panel w-full max-w-sm rounded-xl p-6 relative">
+                <button onclick="toggleSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                
+                <h3 class="text-xl font-mono text-neon-blue mb-6 border-b border-gray-700 pb-2">SYSTEM CONFIG</h3>
+                
+                <div class="space-y-4">
+                    
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wider">Bot Language Mode</label>
+                        <select id="langMode" class="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white font-mono focus:border-neon-blue focus:outline-none">
+                            <option value="malayalam">Pure Malayalam</option>
+                            <option value="manglish">Manglish (Lazy Mode)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="saveSettings()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-sm text-white font-mono transition-colors">
+                            SAVE CHANGES
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // State
+        let isMuted = false;
+        let langMode = localStorage.getItem('thankan_lang_mode') || 'malayalam';
+        
+        // DOM Elements
+        const audio = document.getElementById('bgMusic');
+        const entryScreen = document.getElementById('entryScreen');
+        const chatInterface = document.getElementById('chatInterface');
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const soundBtn = document.getElementById('soundBtn');
+
+        // Initial setup
+        document.getElementById('langMode').value = langMode;
+
+        // Functions
+        function enterChuruli() {
+            // Play Audio
+            audio.volume = 0.4;
+            audio.play().catch(e => console.log("Audio play failed interaction required"));
+            
+            // Transition
+            entryScreen.style.opacity = '0';
+            setTimeout(() => {
+                entryScreen.classList.add('hidden');
+                chatInterface.classList.remove('hidden');
+                chatInterface.classList.add('flex');
+                scrollToBottom();
+            }, 1000);
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            if (isMuted) {
+                audio.pause();
+                soundBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-x w-5 h-5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/></svg>';
+            } else {
+                audio.play();
+                soundBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2 w-5 h-5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+            }
+        }
+
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function saveSettings() {
+            langMode = document.getElementById('langMode').value;
+            localStorage.setItem('thankan_lang_mode', langMode);
+            toggleSettings();
+            
+            // Show system message
+            addMessage("bot", "System settings updated. Reloading module...", true);
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addMessage(sender, text, isSystem = false) {
+            const div = document.createElement('div');
+            
+            if (sender === 'user') {
+                div.className = "flex gap-3 flex-row-reverse animate-in slide-in-from-bottom-2 duration-300";
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 border border-white/10 flex items-center justify-center text-xs">You</div>
+                    <div class="max-w-[85%] bg-neon-blue/10 border border-neon-blue/30 rounded-2xl rounded-tr-none p-3 shadow-lg">
+                        <p class="font-malayalam text-gray-100 text-sm leading-relaxed">${text}</p>
+                    </div>
+                `;
+            } else {
+                // Bot
+                div.className = "flex gap-3 animate-in slide-in-from-bottom-2 duration-300";
+                const bgClass = isSystem ? "bg-red-900/20 border-red-500/30" : "bg-gray-900 border-gray-800";
+                const textClass = isSystem ? "text-red-400 font-mono text-xs" : "text-gray-200 font-malayalam text-sm";
+                
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
+                    <div class="max-w-[85%] ${bgClass} border rounded-2xl rounded-tl-none p-3 shadow-lg">
+                        <p class="${textClass} leading-relaxed">${text}</p>
+                        ${!isSystem ? `<span class="text-[10px] text-gray-600 mt-1 block text-right font-mono">Just now</span>` : ''}
+                    </div>
+                `;
+            }
+
+            chatContainer.appendChild(div);
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const div = document.createElement('div');
+            div.id = 'typingIndicator';
+            div.className = "flex gap-3 animate-pulse";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs text-neon-blue">T</div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-4 flex items-center gap-1">
+                    <div class="w-1.5 h-1.5 bg-neon-blue rounded-full typing-dot"></div>
+                    <div class="w-1.5 h-1.5 bg-neon-blue rounded-full typing-dot"></div>
+                    <div class="w-1.5 h-1.5 bg-neon-blue rounded-full typing-dot"></div>
+                </div>
+            `;
+            chatContainer.appendChild(div);
+            scrollToBottom();
+            return div;
+        }
+
+        async function handleChat(e) {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Add user message
+            addMessage('user', text);
+            userInput.value = '';
+
+            // Show typing
+            const typingIndicator = showTypingIndicator();
+
+            try {
+                // Call Serverless API
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: "user", content: text }],
+                        langMode: langMode
+                    })
+                });
+
+                const data = await response.json();
+                let responseText = "";
+
+                if (data.error) {
+                     responseText = `Error: ${data.error}`;
+                     // Fallback if local dev without API
+                     if(data.error.includes("API Key missing")) {
+                        responseText = "തങ്കൻ: (System Error: API Key not found. Deploy to Vercel and set GROK_API_KEY)";
+                     }
+                } else {
+                    responseText = data.choices[0].message.content;
+                }
+
+                // Remove typing and add bot response
+                typingIndicator.remove();
+                addMessage('bot', responseText);
+
+            } catch (error) {
+                typingIndicator.remove();
+                console.error(error);
+                addMessage('bot', "Connection lost to the loop. (Check Network or Deployment)", true);
+            }
+        }
+    </script>
+</body>
+</html>
