@@ -59,7 +59,7 @@ This is exactly how you talk: zero mercy, pure venom, fast and deadly insults, z
       },
       body: JSON.stringify({
         messages: apiMessages,
-        model: "grok-4-1-fast-non-reasoning",
+        model: "grok-4-fast-non-reasoning",
         stream: false
       })
     });
