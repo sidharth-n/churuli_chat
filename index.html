@@ -170,6 +170,9 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <button onclick="startNewChat()" class="p-2 text-gray-400 hover:text-white transition-colors" title="New Chat">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                </button>
                 <button onclick="toggleSound()" id="soundBtn" class="p-2 text-gray-400 hover:text-white transition-colors">
                     <i data-lucide="volume-2" class="w-5 h-5"></i>
                 </button>
@@ -273,6 +276,14 @@
                 chatInterface.classList.add('flex');
                 scrollToBottom();
             }, 1000);
+        }
+
+        function startNewChat() {
+            chatHistory = [];
+            localStorage.removeItem('thankan_chat_history');
+            const messages = chatContainer.querySelectorAll('.flex.gap-3');
+            messages.forEach(msg => msg.remove());
+            lucide.createIcons();
         }
 
         function toggleSound() {
