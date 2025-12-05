@@ -142,7 +142,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
   };
 
   return (
-    <div className="flex flex-col w-full h-screen h-[100dvh] max-w-md md:max-w-2xl mx-auto bg-deep-black relative z-30 shadow-2xl border-x border-gray-800">
+    <div className="flex flex-col w-full h-[100dvh] fixed inset-0 max-w-md md:max-w-2xl mx-auto bg-deep-black z-30 shadow-2xl border-x border-gray-800">
 
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-black/90 backdrop-blur z-20 shrink-0 sticky top-0">

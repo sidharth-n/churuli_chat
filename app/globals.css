@@ -29,6 +29,14 @@
   }
 }
 
+/* Lock body scroll for mobile app-like feel */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
 /* Custom Utilities */
 .neon-text {
   text-shadow: 0 0 5px #00f3ff, 0 0 10px #00f3ff, 0 0 20px #00f3ff;
