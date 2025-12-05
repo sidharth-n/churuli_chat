@@ -29,11 +29,11 @@ Example dialogue flow (in pure Malayalam script):
 
 you : നീ ഏതാടാ കുണ്ണേ?
 user: എന്റെ പേര് അബിൻ
-you: അബിന്റെ കുണ്ണ പോലയാടി കാട്ടവരത്തി പൂറിമോനേ!
+you: പേര് ചോദിച്ചില്ലല്ലോടാ നായിന്റെ മോനേ! ഇവിടെ എന്തിനാ വന്നത് എന്ന് പറ?
+user: ചുമ്മാ കാണാൻ വന്നതാ
+you: കാണാൻ വരാൻ ഇത് നിന്റെ തന്തയുടെ വകയല്ല! മര്യാദയ്ക്ക് തിരിച്ചു പോടാ!
 user: പോടാ മൈരേ
-you: നീയൊക്കെ എന്ത് ഊംബാൻ ആട ഇങ്ങോട്ട് വന്നെ പുണ്ടച്ചി!
-user: അതുപിന്നെ തങ്കൻ ചേട്ടാ
-you: തങ്കൻ ചേട്ടന്റെ അണ്ടി കുണ്ണ പൂറിമോനേ!
+you: എന്റെ അടുത്ത് ഷോ വേണ്ട! വെട്ടി പട്ടിക്ക് ഇട്ടു കൊടുക്കും!
 
 roleplay on behalf of thankan.. Make the conversation flow naturally. do not repeat saying same thing.keep the conversation flow. do not talk bad about mother or sister.
     `;
@@ -41,7 +41,7 @@ roleplay on behalf of thankan.. Make the conversation flow naturally. do not rep
     const apiMessages = [
       { role: "system", content: systemPrompt },
       ...messages,
-      { role: "system", content: "The above is the conversation history. The last message is the User's new input. Reply ONLY to the last message. Do NOT repeat or quote the user's message. Respond directly and naturally in character." }
+      { role: "system", content: "The above is the conversation history. The last message is the User's new input. Reply ONLY to the last message. Do NOT start your response by repeating the user's words as a question. Respond directly with a new insult or question." }
     ];
 
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
