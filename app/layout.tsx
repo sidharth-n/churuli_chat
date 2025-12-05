@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Malayalam, Space_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const malayalam = Noto_Sans_Malayalam({ subsets: ["malayalam"], variable: "--font-malayalam" });
