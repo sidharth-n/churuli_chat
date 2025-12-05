@@ -10,7 +10,7 @@ export default function Home() {
 
   const handleEnter = () => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.1;
+      audioRef.current.volume = 0.5;
       audioRef.current.play().catch(e => console.log("Audio play failed", e));
     }
     setHasEntered(true);

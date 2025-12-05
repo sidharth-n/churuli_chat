@@ -182,7 +182,9 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
         {/* Initial Message */}
         {messages.length === 0 && (
             <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
+                <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 overflow-hidden">
+                    <img src="/profile.jpg" alt="Thankan" className="w-full h-full object-cover opacity-80 grayscale contrast-125" />
+                </div>
                 <div className="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
                     <p className="font-malayalam text-gray-200 text-sm leading-relaxed">
                         {mode === 'real' 
@@ -207,7 +209,9 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
                     </>
                 ) : (
                     <>
-                        <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
+                        <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 overflow-hidden">
+                            <img src="/profile.jpg" alt="Thankan" className="w-full h-full object-cover opacity-80 grayscale contrast-125" />
+                        </div>
                         <div className="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
                             <p className="font-malayalam text-gray-200 text-sm leading-relaxed">{msg.content}</p>
                             <span className="text-[10px] text-gray-600 mt-1 block text-right font-mono">Just now</span>
