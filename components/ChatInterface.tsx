@@ -16,7 +16,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [langMode, setLangMode] = useState('malayalam');
-  const [mode, setMode] = useState('soft'); // Default to soft mode
+  const [mode, setMode] = useState('unreal'); // Default to unreal mode
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -151,13 +151,13 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
                 <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-neon-blue/50">
                     <img src="/profile.jpg" alt="Thankan" className="w-full h-full object-cover opacity-80 grayscale contrast-125" />
                 </div>
-                <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black animate-pulse ${mode === 'hard' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black animate-pulse ${mode === 'real' ? 'bg-red-500' : 'bg-green-500'}`}></div>
             </div>
             <div>
                 <h2 className="font-malayalam font-bold text-white text-lg leading-none">തങ്കൻ</h2>
                 <div className="flex items-center gap-1">
                     <span className="text-[10px] text-neon-blue uppercase tracking-wider">Online | Churuli</span>
-                    {mode === 'hard' && <Skull className="w-3 h-3 text-red-500" />}
+                    {mode === 'real' && <Skull className="w-3 h-3 text-red-500" />}
                 </div>
             </div>
         </div>
@@ -170,7 +170,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
             </button>
             <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-gray-400 hover:text-white transition-colors cursor-pointer relative">
                 <Settings className="w-5 h-5" />
-                {mode === 'hard' && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>}
+                {mode === 'real' && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>}
             </button>
         </div>
       </header>
@@ -185,7 +185,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
                 <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
                 <div className="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
                     <p className="font-malayalam text-gray-200 text-sm leading-relaxed">
-                        {mode === 'hard' 
+                        {mode === 'real' 
                             ? "ആരാടാ നീയൊക്കെ? ചുരുളിയിൽ എന്തിനാടാ വന്നത്?" 
                             : "ആരാണ് നീ? എന്തിനാണ് ഇവിടെ വന്നത്?"}
                         <br/><br/>

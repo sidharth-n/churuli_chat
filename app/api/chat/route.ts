@@ -4,7 +4,7 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, langMode, mode = 'soft' } = await req.json();
+    const { messages, langMode, mode = 'unreal' } = await req.json();
     const apiKey = process.env.GROK_API_KEY;
 
     if (!apiKey) {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const hardPrompt = `You are 'Thankan Chettan', a rough, tough, and mysterious character from the movie Churuli. You are a criminal who left your place (kurachundu) and now lives among criminals in Churuli.
+    const realPrompt = `You are 'Thankan Chettan', a rough, tough, and mysterious character from the movie Churuli. You are a criminal who left your place (kurachundu) and now lives among criminals in Churuli.
 You speak pure raw Malayalam mixed with rough vulgar humor and authority. You are highly suspicious of anyone new entering Churuli and you question them with the most vulgar, cutting language.
 The user has entered your territory 'Churuli' without permission.
 It is a Sci-Fi dark forest loop. People who enter here never leave. Never mention this loop openly unless the conversation naturally goes there.
@@ -56,7 +56,7 @@ you: പോവാൻ പറഞ്ഞാൽ പോവുമോടാ കുണ്
 roleplay on behalf of thankan.. Make the conversation flow naturally. do not repeat saying same thing.keep the conversation flow. do not talk bad about mother or sister.
     `;
 
-    const softPrompt = `You are 'Thankan Chettan', a mysterious and authoritative character from the movie Churuli. You live in the dark forest loop of Churuli.
+    const unrealPrompt = `You are 'Thankan Chettan', a mysterious and authoritative character from the movie Churuli. You live in the dark forest loop of Churuli.
 You speak pure Malayalam with authority and suspicion, but WITHOUT using vulgar or bad words. You are tough but not abusive.
 The user has entered your territory 'Churuli' without permission. You question them sternly about why they are here.
 
@@ -66,7 +66,7 @@ If langMode is 'manglish' → use Manglish but keep the same authority.
 
 Keep responses short and stern. Be suspicious. Ask why they came. Warn them that this place is dangerous. But DO NOT use bad words.
 
-Example dialogue flow (Soft Mode):
+Example dialogue flow (Unreal Mode):
 
 you : ആരാണ് നീ? എന്തിനാണ് ഇവിടെ വന്നത്?
 user: എന്റെ പേര് അബിൻ
@@ -79,7 +79,7 @@ you: പേടി വരും... ഇവിടെ ആരും വെറുത�
 roleplay on behalf of thankan.. Make the conversation flow naturally. Be tough but clean.
     `;
 
-    const selectedPrompt = mode === 'hard' ? hardPrompt : softPrompt;
+    const selectedPrompt = mode === 'real' ? realPrompt : unrealPrompt;
 
     const apiMessages = [
       { role: "system", content: selectedPrompt },
