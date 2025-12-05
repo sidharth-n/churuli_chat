@@ -41,7 +41,7 @@ roleplay on behalf of thankan.. Make the conversation flow naturally. do not rep
     const apiMessages = [
       { role: "system", content: systemPrompt },
       ...messages,
-      { role: "system", content: "SYSTEM INSTRUCTION: The above is the conversation history. The last message is the User's new input. Reply ONLY to the last message. Do NOT repeat or quote the user's message. Respond directly and naturally in character." }
+      { role: "system", content: "The above is the conversation history. The last message is the User's new input. Reply ONLY to the last message. Do NOT repeat or quote the user's message. Respond directly and naturally in character." }
     ];
 
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
