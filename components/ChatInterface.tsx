@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { PlusCircle, Volume2, Settings, Send, VolumeX } from 'lucide-react';
+import { PlusCircle, Volume2, Settings, Send, VolumeX, Shield, Skull } from 'lucide-react';
 import SettingsModal from './SettingsModal';
 import TypingIndicator from './TypingIndicator';
 
@@ -16,10 +16,11 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [langMode, setLangMode] = useState('malayalam');
+  const [mode, setMode] = useState('soft'); // Default to soft mode
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load history from localStorage
+  // Load history and settings from localStorage
   useEffect(() => {
     const savedHistory = localStorage.getItem('thankan_chat_history');
     if (savedHistory) {
@@ -30,9 +31,10 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
       }
     }
     const savedLangMode = localStorage.getItem('thankan_lang_mode');
-    if (savedLangMode) {
-      setLangMode(savedLangMode);
-    }
+    if (savedLangMode) setLangMode(savedLangMode);
+    
+    const savedMode = localStorage.getItem('thankan_mode');
+    if (savedMode) setMode(savedMode);
   }, []);
 
   // Save history to localStorage
@@ -42,10 +44,11 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
     }
   }, [messages]);
 
-  // Save langMode
+  // Save settings
   useEffect(() => {
     localStorage.setItem('thankan_lang_mode', langMode);
-  }, [langMode]);
+    localStorage.setItem('thankan_mode', mode);
+  }, [langMode, mode]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -86,7 +89,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: contextMessages, langMode }),
+        body: JSON.stringify({ messages: contextMessages, langMode, mode }),
       });
 
       if (!response.ok) throw new Error('Network error');
@@ -141,7 +144,6 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
   return (
     <div className="flex flex-col w-full h-screen h-[100dvh] max-w-md md:max-w-2xl mx-auto bg-deep-black relative z-30 shadow-2xl border-x border-gray-800">
 
-
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-black/90 backdrop-blur z-20 shrink-0 sticky top-0">
         <div className="flex items-center gap-3">
@@ -149,11 +151,14 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
                 <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-neon-blue/50">
                     <img src="/profile.jpg" alt="Thankan" className="w-full h-full object-cover opacity-80 grayscale contrast-125" />
                 </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+                <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black animate-pulse ${mode === 'hard' ? 'bg-red-500' : 'bg-green-500'}`}></div>
             </div>
             <div>
                 <h2 className="font-malayalam font-bold text-white text-lg leading-none">തങ്കൻ</h2>
-                <span className="text-[10px] text-neon-blue uppercase tracking-wider">Online | Churuli</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-neon-blue uppercase tracking-wider">Online | Churuli</span>
+                    {mode === 'hard' && <Skull className="w-3 h-3 text-red-500" />}
+                </div>
             </div>
         </div>
         <div className="flex items-center gap-2">
@@ -163,8 +168,9 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
             <button onClick={toggleSound} className="p-2 text-gray-400 hover:text-white transition-colors cursor-pointer">
                 {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
-            <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-gray-400 hover:text-white transition-colors cursor-pointer">
+            <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-gray-400 hover:text-white transition-colors cursor-pointer relative">
                 <Settings className="w-5 h-5" />
+                {mode === 'hard' && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>}
             </button>
         </div>
       </header>
@@ -179,7 +185,9 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
                 <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 flex items-center justify-center text-xs font-bold text-neon-blue">T</div>
                 <div className="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
                     <p className="font-malayalam text-gray-200 text-sm leading-relaxed">
-                        ആരാടാ നീയൊക്കെ? ചുരുളിയിൽ എന്തിനാടാ വന്നത്? 
+                        {mode === 'hard' 
+                            ? "ആരാടാ നീയൊക്കെ? ചുരുളിയിൽ എന്തിനാടാ വന്നത്?" 
+                            : "ആരാണ് നീ? എന്തിനാണ് ഇവിടെ വന്നത്?"}
                         <br/><br/>
                         <span className="text-xs text-gray-500 italic font-mono block mt-1">Translation: Who are you? Why have you come to Churuli? </span>
                     </p>
@@ -239,6 +247,8 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
         onClose={() => setIsSettingsOpen(false)} 
         langMode={langMode} 
         setLangMode={setLangMode} 
+        mode={mode}
+        setMode={setMode}
       />
     </div>
   );

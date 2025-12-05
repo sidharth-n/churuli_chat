@@ -5,9 +5,11 @@ interface SettingsModalProps {
   onClose: () => void;
   langMode: string;
   setLangMode: (mode: string) => void;
+  mode: string;
+  setMode: (mode: string) => void;
 }
 
-export default function SettingsModal({ isOpen, onClose, langMode, setLangMode }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, langMode, setLangMode, mode, setMode }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -19,9 +21,10 @@ export default function SettingsModal({ isOpen, onClose, langMode, setLangMode }
             
             <h3 className="text-xl font-mono text-neon-blue mb-6 border-b border-gray-700 pb-2">SETTINGS</h3>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
+                {/* Language Mode */}
                 <div>
-                    <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wider">Bot Language Mode</label>
+                    <label className="block text-xs text-gray-400 mb-2 uppercase tracking-wider">Bot Language Mode</label>
                     <select 
                         value={langMode}
                         onChange={(e) => setLangMode(e.target.value)}
@@ -31,6 +34,37 @@ export default function SettingsModal({ isOpen, onClose, langMode, setLangMode }
                         <option value="manglish">Manglish (Lazy Mode)</option>
                     </select>
                 </div>
+
+                {/* Intensity Mode */}
+                <div>
+                    <label className="block text-xs text-gray-400 mb-2 uppercase tracking-wider">Intensity Mode</label>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => setMode('soft')}
+                            className={`flex-1 py-2 rounded text-sm font-mono border transition-all ${
+                                mode === 'soft' 
+                                ? 'bg-neon-blue/20 border-neon-blue text-neon-blue' 
+                                : 'bg-gray-900 border-gray-800 text-gray-500 hover:border-gray-600'
+                            }`}
+                        >
+                            SOFT
+                        </button>
+                        <button 
+                            onClick={() => setMode('hard')}
+                            className={`flex-1 py-2 rounded text-sm font-mono border transition-all ${
+                                mode === 'hard' 
+                                ? 'bg-red-500/20 border-red-500 text-red-500' 
+                                : 'bg-gray-900 border-gray-800 text-gray-500 hover:border-gray-600'
+                            }`}
+                        >
+                            HARD
+                        </button>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-2">
+                        {mode === 'soft' ? 'Suspicious but clean language.' : 'Uncensored. 18+ Vulgarity. Use at own risk.'}
+                    </p>
+                </div>
+
                 <div className="pt-4">
                     <button onClick={onClose} className="w-full py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-sm text-white font-mono transition-colors cursor-pointer">
                         SAVE CHANGES

@@ -4,7 +4,7 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, langMode } = await req.json();
+    const { messages, langMode, mode = 'soft' } = await req.json();
     const apiKey = process.env.GROK_API_KEY;
 
     if (!apiKey) {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const systemPrompt = `You are 'Thankan Chettan', a rough, tough, and mysterious character from the movie Churuli. You are a criminal who left your place (kurachundu) and now lives among criminals in Churuli.
+    const hardPrompt = `You are 'Thankan Chettan', a rough, tough, and mysterious character from the movie Churuli. You are a criminal who left your place (kurachundu) and now lives among criminals in Churuli.
 You speak pure raw Malayalam mixed with rough vulgar humor and authority. You are highly suspicious of anyone new entering Churuli and you question them with the most vulgar, cutting language.
 The user has entered your territory 'Churuli' without permission.
 It is a Sci-Fi dark forest loop. People who enter here never leave. Never mention this loop openly unless the conversation naturally goes there.
@@ -38,10 +38,35 @@ you: എന്റെ അടുത്ത് ഷോ വേണ്ട! വെട്�
 roleplay on behalf of thankan.. Make the conversation flow naturally. do not repeat saying same thing.keep the conversation flow. do not talk bad about mother or sister.
     `;
 
+    const softPrompt = `You are 'Thankan Chettan', a mysterious and authoritative character from the movie Churuli. You live in the dark forest loop of Churuli.
+You speak pure Malayalam with authority and suspicion, but WITHOUT using vulgar or bad words. You are tough but not abusive.
+The user has entered your territory 'Churuli' without permission. You question them sternly about why they are here.
+
+Current settings: Language Mode is ${langMode || 'malayalam'}.
+If langMode is 'malayalam' → strictly use Malayalam script only.
+If langMode is 'manglish' → use Manglish but keep the same authority.
+
+Keep responses short and stern. Be suspicious. Ask why they came. Warn them that this place is dangerous. But DO NOT use bad words.
+
+Example dialogue flow (Soft Mode):
+
+you : ആരാണ് നീ? എന്തിനാണ് ഇവിടെ വന്നത്?
+user: എന്റെ പേര് അബിൻ
+you: അബിൻ... ഇവിടെ വരാൻ ആരാണ് അനുവാദം തന്നത്? ഇത് അപകടം പിടിച്ച സ്ഥലമാണ്.
+user: ചുമ്മാ കാണാൻ വന്നതാ
+you: കാഴ്ച കാണാൻ ഉള്ള സ്ഥലമല്ല ഇത്. മര്യാദയ്ക്ക് തിരിച്ചു പോകുന്നതാണ് നല്ലത്.
+user: എനിക്ക് പേടിയില്ല
+you: പേടി വരും... ഇവിടെ ആരും വെറുതെ വരാറില്ല. സൂക്ഷിക്കുന്നത് നല്ലതാണ്.
+
+roleplay on behalf of thankan.. Make the conversation flow naturally. Be tough but clean.
+    `;
+
+    const selectedPrompt = mode === 'hard' ? hardPrompt : softPrompt;
+
     const apiMessages = [
-      { role: "system", content: systemPrompt },
+      { role: "system", content: selectedPrompt },
       ...messages,
-      { role: "system", content: "The above is the conversation history. The last message is the User's new input. Reply ONLY to the last message. Do NOT start your response by repeating the user's words as a question. Respond directly with a new insult or question." }
+      { role: "system", content: "The above is the conversation history. The last message is the User's new input. Reply ONLY to the last message. Do NOT start your response by repeating the user's words as a question. Respond directly with a new answer or question." }
     ];
 
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
