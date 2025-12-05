@@ -212,7 +212,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
                         <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 border border-neon-blue/30 overflow-hidden">
                             <img src="/profile.jpg" alt="Thankan" className="w-full h-full object-cover opacity-80 grayscale contrast-125" />
                         </div>
-                        <div className="max-w-[85%] bg-gray-900 border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
+                        <div className="max-w-[85%] bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-2xl rounded-tl-none p-3 shadow-lg">
                             <p className="font-malayalam text-gray-200 text-sm leading-relaxed">{msg.content}</p>
                             <span className="text-[10px] text-gray-600 mt-1 block text-right font-mono">Just now</span>
                         </div>
@@ -225,7 +225,7 @@ export default function ChatInterface({ audioRef }: { audioRef: React.RefObject<
       </div>
 
       {/* Input Area */}
-      <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-gray-800 bg-black/90 backdrop-blur z-20 shrink-0 sticky bottom-0">
+      <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-gray-800 bg-black/60 backdrop-blur-md z-20 shrink-0 sticky bottom-0">
         <form onSubmit={handleSubmit} className="relative flex items-end gap-2">
             <div className="flex-1 relative">
                 <input 
