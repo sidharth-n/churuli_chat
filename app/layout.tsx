@@ -1,22 +1,27 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Malayalam, Space_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
-const notoSansMalayalam = Noto_Sans_Malayalam({
-  variable: "--font-malayalam",
-  subsets: ["malayalam"],
-  weight: ["400", "700"],
-});
-
-const spaceMono = Space_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+const malayalam = Noto_Sans_Malayalam({ subsets: ["malayalam"], variable: "--font-malayalam" });
+const mono = Space_Mono({ weight: "400", subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Thankan.andi - Churuli Chatbot",
-  description: "The Labyrinth",
+  title: "Thankan Chettan | Churuli Chatbot",
+  description: "Experience the mystery of Churuli with Thankan Chettan. A unique AI chatbot experience.",
+  openGraph: {
+    title: "Thankan Chettan | Churuli Chatbot",
+    description: "Experience the mystery of Churuli with Thankan Chettan. A unique AI chatbot experience.",
+    images: [
+      {
+        url: "/profile.jpg",
+        width: 800,
+        height: 800,
+        alt: "Thankan Chettan Profile",
+      },
+    ],
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -26,10 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${notoSansMalayalam.variable} ${spaceMono.variable} antialiased bg-black text-gray-200 overflow-hidden`}
-      >
+      <body className={`${malayalam.variable} ${mono.variable} font-sans antialiased bg-deep-black text-white overflow-hidden`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
